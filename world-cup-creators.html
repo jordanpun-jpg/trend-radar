@@ -278,16 +278,13 @@ h1 span { color: #4ade80; }
 
 <!-- FEED TAB -->
 <div id="tab-feed" class="tab-panel active">
-  <div class="feed-header">
-    <div class="feed-meta">15 creators · TT + IG · June 2026</div>
-  </div>
   <div class="feed-grid" id="feed-grid"></div>
 </div>
 
 <!-- DATA TAB -->
 <div id="tab-data" class="tab-panel">
   <div class="data-header">
-    <p class="data-subtitle">Followers vs June avg views. Points above the trendline are getting more views than their audience size would predict.</p>
+    <p class="data-subtitle">Creators above the trendline are performing at an outlier level because they're getting more views than their audience size would predict. Prioritize outreach to the green creators.</p>
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background:#4ade80;"></div>Over-performing</div>
       <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div>On trend</div>
@@ -359,7 +356,7 @@ function switchTab(id, btn) {
 
 // ── FEED ──
 const grid = document.getElementById('feed-grid');
-creators.forEach(c => {
+[...creators].sort((a,b) => b.followers - a.followers).forEach(c => {
   const a = document.createElement('a');
   a.className = 'creator-card';
   a.href = c.url;

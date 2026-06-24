@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trending World Cup Creators</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  background: #0a0a0a;
+  color: #e8e8e8;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  padding: 36px 48px 0;
+}
+
+h1 {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #f0f0f0;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+
+h1 span { color: #4ade80; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  margin: 0 48px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 20px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  margin-bottom: -0.5px;
+  transition: color 0.15s, border-color 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.tab-btn:hover { color: #999; }
+.tab-btn.active { color: #f0f0f0; border-bottom-color: #4ade80; }
+
+/* ── TAB PANELS ── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── FEED TAB ── */
+.feed-header {
+  padding: 28px 48px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.feed-meta {
+  font-size: 12px;
+  color: #444;
+}
+
+.feed-grid {
+  padding: 20px 48px 60px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.creator-card {
+  background: #111;
+  border: 0.5px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 20px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, transform 0.12s;
+  position: relative;
+  overflow: hidden;
+}
+
+.creator-card:hover {
+  background: #161616;
+  border-color: rgba(255,255,255,0.14);
+  transform: translateY(-2px);
+}
+
+.creator-card:hover .card-arrow { opacity: 1; }
+
+.card-arrow {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 11px;
+  color: #444;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+  background: #1a1a1a;
+  border: 0.5px solid rgba(255,255,255,0.08);
+  display: block;
+}
+
+.avatar-fallback {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 0.5px solid rgba(255,255,255,0.08);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+  color: #4ade80;
+  flex-shrink: 0;
+}
+
+.card-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e0e0e0;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.card-followers {
+  font-size: 11px;
+  color: #555;
+}
+
+.card-platform {
+  margin-top: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #333;
+  background: #171717;
+  border: 0.5px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+/* ── DATA TAB ── */
+.data-header {
+  padding: 28px 48px 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.data-subtitle {
+  font-size: 13px;
+  color: #555;
+  max-width: 460px;
+  line-height: 1.5;
+}
+
+.legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #666;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chart-wrap {
+  padding: 24px 48px 0;
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 560px;
+}
+
+.data-footer {
+  padding: 20px 48px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-note {
+  font-size: 11px;
+  color: #333;
+}
+
+/* ── TOOLTIP ── */
+#tooltip {
+  position: fixed;
+  display: none;
+  background: #161616;
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 12px 16px;
+  pointer-events: none;
+  z-index: 100;
+  min-width: 200px;
+}
+
+#tooltip .t-name { font-size: 13px; font-weight: 600; color: #f0f0f0; margin-bottom: 8px; }
+#tooltip .t-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; font-size: 12px; color: #555; margin-bottom: 4px; }
+#tooltip .t-val { color: #ccc; font-weight: 500; }
+#tooltip .t-perf { margin-top: 10px; padding-top: 10px; border-top: 0.5px solid rgba(255,255,255,0.07); font-size: 12px; font-weight: 500; }
+#tooltip .t-perf.over { color: #4ade80; }
+#tooltip .t-perf.under { color: #f87171; }
+#tooltip .t-perf.avg { color: #60a5fa; }
+#tooltip .t-click { margin-top: 8px; font-size: 11px; color: #444; }
+
+@media (max-width: 640px) {
+  header, .tabs, .feed-header, .feed-grid, .data-header, .chart-wrap, .data-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  h1 { font-size: 22px; }
+  .chart-container { height: 400px; }
+  .feed-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Trending World Cup <span>Creators</span></h1>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('feed', this)">Feed</button>
+  <button class="tab-btn" onclick="switchTab('data', this)">Data</button>
+</div>
+
+<!-- FEED TAB -->
+<div id="tab-feed" class="tab-panel active">
+  <div class="feed-header">
+    <div class="feed-meta">15 creators · TT + IG · June 2026</div>
+  </div>
+  <div class="feed-grid" id="feed-grid"></div>
+</div>
+
+<!-- DATA TAB -->
+<div id="tab-data" class="tab-panel">
+  <div class="data-header">
+    <p class="data-subtitle">Followers vs June avg views. Points above the trendline are getting more views than their audience size would predict.</p>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#4ade80;"></div>Over-performing</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div>On trend</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f87171;"></div>Under-performing</div>
+      <div class="legend-item" style="margin-left:4px; border-left: 0.5px solid rgba(255,255,255,0.08); padding-left: 16px;">
+        <svg width="24" height="10" style="flex-shrink:0"><line x1="0" y1="5" x2="24" y2="5" stroke="#555" stroke-width="1.5" stroke-dasharray="4,3"/></svg>
+        Trendline
+      </div>
+    </div>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-container">
+      <canvas id="chart" role="img" aria-label="Scatter plot of World Cup creators by follower count vs June average views."></canvas>
+    </div>
+  </div>
+  <div class="data-footer">
+    <div class="footer-note">TT + IG combined followers · June 2026 avg views per video</div>
+    <div class="footer-note">Hover to inspect · Click any dot to open profile · Bubble size = follower count</div>
+  </div>
+</div>
+
+<div id="tooltip">
+  <div class="t-name" id="tt-name"></div>
+  <div class="t-row"><span>Followers</span><span class="t-val" id="tt-followers"></span></div>
+  <div class="t-row"><span>Avg views (June)</span><span class="t-val" id="tt-views"></span></div>
+  <div class="t-row"><span>vs expected</span><span class="t-val" id="tt-vs"></span></div>
+  <div class="t-perf" id="tt-perf"></div>
+  <div class="t-click">Click to open profile →</div>
+</div>
+
+<script>
+const BASE = 'https://jordanpun-jpg.github.io/trend-radar/e%20pfp/';
+const creators = [
+  { name: 'Bob Travel',        followers: 164000,    views: 457000,    url: 'https://www.tiktok.com/@bob.travel6',              pfp: BASE+'bob.jpeg',        platform: 'TikTok' },
+  { name: 'Celine Dept',       followers: 28000000,  views: 7500000,   url: 'https://www.instagram.com/celine.dept/',           pfp: BASE+'celine.jpg',      platform: 'Instagram' },
+  { name: 'John Nellis',       followers: 3400000,   views: 1500000,   url: 'https://www.tiktok.com/@johnnellis_',              pfp: BASE+'john.jpeg',       platform: 'TikTok' },
+  { name: 'Arthur Lima',       followers: 21000000,  views: 14070000,  url: 'https://www.tiktok.com/@artthuroficial_',          pfp: BASE+'arthur.jpg',      platform: 'TikTok' },
+  { name: 'Frank Illet',       followers: 3000000,   views: 321000,    url: 'https://www.instagram.com/theunitedstrand/reels/', pfp: BASE+'frank.jpg',       platform: 'Instagram' },
+  { name: 'FutCrunch',         followers: 2800000,   views: 2100000,   url: 'https://www.tiktok.com/@futcrunch',                pfp: BASE+'futcrunch.jpeg',  platform: 'TikTok' },
+  { name: 'Ben Black',         followers: 1400000,   views: 453000,    url: 'https://www.instagram.com/benblack/reels/',        pfp: BASE+'ben.jpg',         platform: 'Instagram' },
+  { name: 'Karan Sonawane',    followers: 1600000,   views: 3021000,   url: 'https://www.instagram.com/focusedindian',          pfp: BASE+'karan.jpg',       platform: 'Instagram' },
+  { name: 'Fabrizio Romano',   followers: 70000000,  views: 12000000,  url: 'https://www.instagram.com/fabriziorom/reels/',     pfp: BASE+'fabrizio.jpg',    platform: 'Instagram' },
+  { name: 'MattyFC',           followers: 640000,    views: 2300000,   url: 'https://www.instagram.com/mattyfc__/reels/',       pfp: BASE+'matty.jpg',       platform: 'Instagram' },
+  { name: 'At Frenches',       followers: 4700000,   views: 1340000,   url: 'https://www.instagram.com/atfrenchies',            pfp: BASE+'atfrenchies.jpg', platform: 'Instagram' },
+  { name: 'KnollDoll',         followers: 3000000,   views: 2100000,   url: 'https://www.instagram.com/knolldoll/reels/',       pfp: BASE+'knolldoll.jpg',   platform: 'Instagram' },
+  { name: 'Younes Zarou',      followers: 83000000,  views: 21000000,  url: 'https://www.instagram.com/youneszarou',            pfp: BASE+'younes.jpg',      platform: 'Instagram' },
+  { name: 'Iman Ali Dib',      followers: 2300000,   views: 500000,    url: 'https://www.instagram.com/iman.alidib/reels/',     pfp: BASE+'iman.jpg',        platform: 'Instagram' },
+  { name: 'Brittany Scarlett', followers: 100000,    views: 300000,    url: 'https://www.instagram.com/brittneyscarlett',       pfp: BASE+'brittney.jpg',    platform: 'Instagram' },
+];
+
+function fmt(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1).replace(/\.0$/,'')+'M';
+  if (n >= 1000)    return Math.round(n/1000)+'K';
+  return n;
+}
+
+function initials(name) {
+  return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+}
+
+// ── TABS ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'data' && !chartBuilt) buildChart();
+}
+
+// ── FEED ──
+const grid = document.getElementById('feed-grid');
+creators.forEach(c => {
+  const a = document.createElement('a');
+  a.className = 'creator-card';
+  a.href = c.url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+
+  const arrow = document.createElement('span');
+  arrow.className = 'card-arrow';
+  arrow.textContent = '↗';
+  a.appendChild(arrow);
+
+  // Try image first, fallback to initials
+  const img = document.createElement('img');
+  img.className = 'avatar';
+  img.alt = c.name;
+  img.src = c.pfp;
+  img.onerror = function() {
+    const fb = document.createElement('div');
+    fb.className = 'avatar-fallback';
+    fb.textContent = initials(c.name);
+    a.replaceChild(fb, img);
+  };
+  a.appendChild(img);
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'card-name';
+  nameEl.textContent = c.name;
+  a.appendChild(nameEl);
+
+  const followersEl = document.createElement('div');
+  followersEl.className = 'card-followers';
+  followersEl.textContent = fmt(c.followers) + ' followers';
+  a.appendChild(followersEl);
+
+  const platformEl = document.createElement('div');
+  platformEl.className = 'card-platform';
+  platformEl.textContent = c.platform;
+  a.appendChild(platformEl);
+
+  grid.appendChild(a);
+});
+
+// ── CHART ──
+let chartBuilt = false;
+
+function logReg(data) {
+  const n = data.length;
+  const lx = data.map(d => Math.log10(d.x));
+  const ly = data.map(d => Math.log10(d.y));
+  const sumX = lx.reduce((a,b)=>a+b,0);
+  const sumY = ly.reduce((a,b)=>a+b,0);
+  const sumXX = lx.reduce((a,b)=>a+b*b,0);
+  const sumXY = lx.reduce((a,b,i)=>a+b*ly[i],0);
+  const m = (n*sumXY - sumX*sumY)/(n*sumXX - sumX*sumX);
+  const b = (sumY - m*sumX)/n;
+  return {m, b};
+}
+
+const pts = creators.map(c => ({x: c.followers, y: c.views, name: c.name, url: c.url}));
+const reg = logReg(pts);
+function predictY(x) { return Math.pow(10, reg.m*Math.log10(x)+reg.b); }
+
+const THRESH = 0.18;
+const enriched = pts.map(p => {
+  const pred = predictY(p.x);
+  const ratio = Math.log10(p.y/pred);
+  let color, border, status;
+  if (ratio > THRESH)       { color='rgba(74,222,128,0.75)'; border='#22c55e'; status='over'; }
+  else if (ratio < -THRESH) { color='rgba(248,113,113,0.75)'; border='#ef4444'; status='under'; }
+  else                      { color='rgba(96,165,250,0.75)'; border='#3b82f6'; status='avg'; }
+  return {...p, color, border, status, ratio};
+});
+
+const maxF = Math.max(...pts.map(p=>p.x));
+function bR(f) { return Math.max(7, Math.sqrt(f/maxF)*36); }
+
+const trendPts = [80000, 180000000].map(x=>({x, y: predictY(x)}));
+const tooltip = document.getElementById('tooltip');
+
+function buildChart() {
+  chartBuilt = true;
+
+  const chart = new Chart(document.getElementById('chart'), {
+    type: 'bubble',
+    data: {
+      datasets: [
+        {
+          label: 'Trendline',
+          type: 'line',
+          data: trendPts,
+          borderColor: 'rgba(255,255,255,0.14)',
+          borderWidth: 1.5,
+          borderDash: [5,4],
+          pointRadius: 0,
+          fill: false,
+          tension: 0,
+          order: 2,
+        },
+        {
+          label: 'Creators',
+          data: enriched.map(p => ({x: p.x, y: p.y, r: bR(p.x)})),
+          backgroundColor: enriched.map(p=>p.color),
+          borderColor: enriched.map(p=>p.border),
+          borderWidth: 1.5,
+          hoverBorderWidth: 2.5,
+          order: 1,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 24, right: 120, bottom: 8, left: 20 } },
+      animation: { duration: 600, easing: 'easeOutQuart' },
+      scales: {
+        x: {
+          type: 'logarithmic',
+          title: { display: true, text: 'Total followers (TT + IG)', color: '#444', font: { size: 11, family: 'inherit' } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'rgba(255,255,255,0.08)' },
+          ticks: {
+            color: '#444', font: { size: 11, family: 'inherit' },
+            callback: v => ({100000:'100K',1000000:'1M',10000000:'10M',100000000:'100M'}[v] || null)
+          },
+          min: 70000, max: 200000000,
+        },
+        y: {
+          type: 'logarithmic',
+          title: { display: true, text: 'Avg views per video — June 2026', color: '#444', font: { size: 11, family: 'inherit' } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'rgba(255,255,255,0.08)' },
+          ticks: {
+            color: '#444', font: { size: 11, family: 'inherit' },
+            callback: v => ({100000:'100K',500000:'500K',1000000:'1M',5000000:'5M',10000000:'10M',25000000:'25M'}[v] || null)
+          },
+          min: 150000, max: 35000000,
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+      },
+      onHover: (event, elements) => {
+        const canvas = document.getElementById('chart');
+        const hit = elements.length && elements[0].datasetIndex === 1;
+        canvas.style.cursor = hit ? 'pointer' : 'default';
+
+        if (!hit) { tooltip.style.display = 'none'; return; }
+
+        const idx = elements[0].index;
+        const p = enriched[idx];
+        const pred = predictY(p.x);
+        const pct = Math.round((p.y/pred - 1)*100);
+        const sign = pct >= 0 ? '+' : '';
+
+        document.getElementById('tt-name').textContent = p.name;
+        document.getElementById('tt-followers').textContent = fmt(p.x);
+        document.getElementById('tt-views').textContent = fmt(p.y);
+        document.getElementById('tt-vs').textContent = sign + pct + '%';
+
+        const perfEl = document.getElementById('tt-perf');
+        if (p.status === 'over')       { perfEl.textContent = '↑ Over-performing vs audience size'; perfEl.className = 't-perf over'; }
+        else if (p.status === 'under') { perfEl.textContent = '↓ Under-performing vs audience size'; perfEl.className = 't-perf under'; }
+        else                           { perfEl.textContent = '→ Performing as expected'; perfEl.className = 't-perf avg'; }
+
+        const x = event.native.clientX, y = event.native.clientY;
+        tooltip.style.display = 'block';
+        const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+        const vw = window.innerWidth,   vh = window.innerHeight;
+        tooltip.style.left = (x + 16 + tw > vw ? x - tw - 12 : x + 16) + 'px';
+        tooltip.style.top  = (y + 16 + th > vh ? y - th - 12 : y + 16) + 'px';
+      },
+    },
+    plugins: [{
+      id: 'labels',
+      afterDatasetsDraw(chart) {
+        const {ctx} = chart;
+        const ds = chart.getDatasetMeta(1);
+        ctx.save();
+        ds.data.forEach((el, i) => {
+          const p = enriched[i];
+          const {x, y} = el.getCenterPoint();
+          ctx.font = '500 11px -apple-system, BlinkMacSystemFont, Inter, sans-serif';
+          ctx.fillStyle = 'rgba(200,200,200,0.8)';
+          ctx.textAlign = 'left';
+          ctx.fillText(p.name, x + bR(p.x) + 5, y + 4);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+
+  document.getElementById('chart').addEventListener('click', function(e) {
+    const els = chart.getElementsAtEventForMode(e, 'nearest', {intersect: true}, true);
+    if (!els.length || els[0].datasetIndex !== 1) return;
+    const url = enriched[els[0].index].url;
+    if (url) window.open(url, '_blank', 'noopener');
+  });
+}
+
+document.addEventListener('mousemove', (e) => {
+  if (tooltip.style.display === 'block') {
+    const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+    const vw = window.innerWidth,   vh = window.innerHeight;
+    tooltip.style.left = (e.clientX + 16 + tw > vw ? e.clientX - tw - 12 : e.clientX + 16) + 'px';
+    tooltip.style.top  = (e.clientY + 16 + th > vh ? e.clientY - th - 12 : e.clientY + 16) + 'px';
+  }
+});
+</script>
+</body>
+</html>

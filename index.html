@@ -52,15 +52,38 @@ body{background:var(--bg);color:var(--text-primary);font-family:-apple-system,Bl
 .card-header{padding:14px 20px 10px;flex-shrink:0;}
 .card-title{font-size:16px;font-weight:600;color:var(--text-primary);line-height:1.3;}
 .card-meta{font-size:12px;color:var(--text-tertiary);margin-top:3px;}
+
 /* Static image phone */
 .phone-wrap{flex:1;min-height:0;padding:0 20px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 .phone-frame{position:relative;border-radius:32px;border:3px solid rgba(255,255,255,0.22);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06),0 0 0 1px rgba(0,0,0,0.6);overflow:hidden;background:#111;width:100%;max-width:320px;-webkit-transform:translateZ(0);transform:translateZ(0);}
 .phone-notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:52px;height:10px;background:#0e0e0e;border-radius:0 0 8px 8px;z-index:2;}
 .phone-img{width:100%;display:block;object-fit:cover;object-position:top center;max-height:calc(100vh - var(--hdr-h) - var(--tab-h) - 130px);-webkit-backface-visibility:hidden;backface-visibility:hidden;}
-/* TikTok embed phone — no notch, square-ish corners to match TT player */
-.phone-frame--embed{border-radius:16px;max-width:320px;border:3px solid rgba(255,255,255,0.22);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06),0 0 0 1px rgba(0,0,0,0.6);overflow:hidden;background:#111;width:100%;-webkit-transform:translateZ(0);transform:translateZ(0);}
-.tiktok-embed{margin:0 !important;border:none !important;}
-/* Buttons */
+
+/* TikTok iframe embed — fills flex space, crops cleanly */
+.phone-wrap{flex:1;min-height:0;padding:0 20px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.tt-embed-frame{
+  flex:1;
+  min-height:0;
+  width:100%;
+  max-width:320px;
+  /* height = full available space minus header/tabs/buttons */
+  height:calc(100vh - var(--hdr-h) - var(--tab-h) - 130px);
+  border-radius:16px;
+  overflow:hidden;
+  border:3px solid rgba(255,255,255,0.22);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06),0 0 0 1px rgba(0,0,0,0.6);
+  background:#111;
+  position:relative;
+}
+.tt-embed-frame iframe{
+  position:absolute;
+  top:0;left:0;
+  width:100%;
+  height:100%;
+  border:none;
+  display:block;
+}
+
 .btn-row{display:flex;align-items:center;padding:12px 20px 16px;flex-shrink:0;}
 .icon-btn{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;text-decoration:none;transition:transform .15s,opacity .15s;-webkit-backface-visibility:hidden;backface-visibility:hidden;}
 .icon-btn:hover{transform:scale(1.08);opacity:0.85;}
@@ -68,7 +91,6 @@ body{background:var(--bg);color:var(--text-primary);font-family:-apple-system,Bl
 .play-btn svg{fill:#000;}
 .info-btn{background:rgba(77,159,255,0.15);border:1px solid rgba(77,159,255,0.3);}
 .info-btn svg{stroke:var(--link);}
-/* Back */
 .back-scroll{flex:1;min-height:0;overflow-y:auto;padding:20px 20px 0;scrollbar-width:none;}
 .back-scroll::-webkit-scrollbar{display:none;}
 .back-title{font-size:16px;font-weight:600;color:var(--text-primary);line-height:1.3;margin-bottom:2px;}
@@ -84,7 +106,6 @@ body{background:var(--bg);color:var(--text-primary);font-family:-apple-system,Bl
 .link-chip:hover{opacity:.75;}
 .link-chip svg{flex-shrink:0;stroke:var(--link);}
 .back-links .link-chip+.link-chip::before{content:"·";color:var(--text-tertiary);margin-right:2px;font-size:14px;text-decoration:none;}
-/* Takeaways */
 .takeaway-snap{scroll-snap-align:start;scroll-snap-stop:always;height:100%;display:flex;align-items:center;padding:16px;overflow-y:auto;}
 .takeaway-inner{width:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
 .takeaway-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
@@ -128,10 +149,14 @@ body{background:var(--bg);color:var(--text-primary);font-family:-apple-system,Bl
           <div class="card-meta">207m views · 10× channel avg</div>
         </div>
         <div class="phone-wrap">
-          <div class="phone-frame phone-frame--embed">
-            <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@funnycutecat9677/video/7652314523793116447" data-video-id="7652314523793116447" data-embed-from="embed_page" style="max-width:100%;min-width:100%;border:none;padding:0;margin:0;">
-              <section></section>
-            </blockquote>
+          <div class="tt-embed-frame">
+            <iframe
+              src="https://www.tiktok.com/embed/v2/7652314523793116447"
+              allowfullscreen
+              scrolling="no"
+              allow="encrypted-media;"
+              style="border:none;width:100%;height:100%;display:block;"
+            ></iframe>
           </div>
         </div>
         <div class="btn-row">
@@ -164,10 +189,14 @@ body{background:var(--bg);color:var(--text-primary);font-family:-apple-system,Bl
           <div class="card-meta">#1 trending sound on TikTok</div>
         </div>
         <div class="phone-wrap">
-          <div class="phone-frame phone-frame--embed">
-            <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@stellybean09/video/7652614191282507039" data-video-id="7652614191282507039" data-embed-from="embed_page" style="max-width:100%;min-width:100%;border:none;padding:0;margin:0;">
-              <section></section>
-            </blockquote>
+          <div class="tt-embed-frame">
+            <iframe
+              src="https://www.tiktok.com/embed/v2/7652614191282507039"
+              allowfullscreen
+              scrolling="no"
+              allow="encrypted-media;"
+              style="border:none;width:100%;height:100%;display:block;"
+            ></iframe>
           </div>
         </div>
         <div class="btn-row">
@@ -236,10 +265,14 @@ body{background:var(--bg);color:var(--text-primary);font-family:-apple-system,Bl
           <div class="card-meta">6 of 10 top trending creators this week</div>
         </div>
         <div class="phone-wrap">
-          <div class="phone-frame phone-frame--embed">
-            <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@funny_cats0953/video/7652020500184485151" data-video-id="7652020500184485151" data-embed-from="embed_page" style="max-width:100%;min-width:100%;border:none;padding:0;margin:0;">
-              <section></section>
-            </blockquote>
+          <div class="tt-embed-frame">
+            <iframe
+              src="https://www.tiktok.com/embed/v2/7652020500184485151"
+              allowfullscreen
+              scrolling="no"
+              allow="encrypted-media;"
+              style="border:none;width:100%;height:100%;display:block;"
+            ></iframe>
           </div>
         </div>
         <div class="btn-row">
@@ -272,10 +305,14 @@ body{background:var(--bg);color:var(--text-primary);font-family:-apple-system,Bl
           <div class="card-meta">Just outside top 10 trending this week</div>
         </div>
         <div class="phone-wrap">
-          <div class="phone-frame phone-frame--embed">
-            <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@moonmediagames/video/7653132527107853582" data-video-id="7653132527107853582" data-embed-from="embed_page" style="max-width:100%;min-width:100%;border:none;padding:0;margin:0;">
-              <section></section>
-            </blockquote>
+          <div class="tt-embed-frame">
+            <iframe
+              src="https://www.tiktok.com/embed/v2/7653132527107853582"
+              allowfullscreen
+              scrolling="no"
+              allow="encrypted-media;"
+              style="border:none;width:100%;height:100%;display:block;"
+            ></iframe>
           </div>
         </div>
         <div class="btn-row">
@@ -308,10 +345,14 @@ body{background:var(--bg);color:var(--text-primary);font-family:-apple-system,Bl
           <div class="card-meta">Just outside top 10 trending this week</div>
         </div>
         <div class="phone-wrap">
-          <div class="phone-frame phone-frame--embed">
-            <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@thesmilyfam/video/7654104879450836254" data-video-id="7654104879450836254" data-embed-from="embed_page" style="max-width:100%;min-width:100%;border:none;padding:0;margin:0;">
-              <section></section>
-            </blockquote>
+          <div class="tt-embed-frame">
+            <iframe
+              src="https://www.tiktok.com/embed/v2/7654104879450836254"
+              allowfullscreen
+              scrolling="no"
+              allow="encrypted-media;"
+              style="border:none;width:100%;height:100%;display:block;"
+            ></iframe>
           </div>
         </div>
         <div class="btn-row">
@@ -554,7 +595,6 @@ body{background:var(--bg);color:var(--text-primary);font-family:-apple-system,Bl
     <div class="tab-panel" id="w1-takeaways"><div class="snap-feed"><div class="takeaway-snap"><div class="takeaway-inner"><div class="takeaway-card"><div class="takeaway-header"><div class="takeaway-num">1</div><div class="takeaway-title">Repeatability beats novelty for virality</div></div><div class="takeaway-body">The toy story challenge and sticky vs slippery stairs both win: zero equipment, instantly understandable stakes.</div></div><div class="takeaway-card"><div class="takeaway-header"><div class="takeaway-num">2</div><div class="takeaway-title">Share ratio is a stronger signal than raw views</div></div><div class="takeaway-body">"Climb the moving stairs" had 50k shares to 7k comments. Track this alongside raw views.</div></div><div class="takeaway-card"><div class="takeaway-header"><div class="takeaway-num">3</div><div class="takeaway-title">World Cup is a rare convergence window</div></div><div class="takeaway-body">Europeans reacting to American food needs no backstory and is peaking now. Strong window for European or Brazilian creator collabs.</div></div></div></div></div></div>
   </div>
 </div>
-<script async src="https://www.tiktok.com/embed.js"></script>
 <script>
 var currentWeek='w2',currentTab='trends';
 function toggleDropdown(){document.getElementById('weekBtn').classList.toggle('open');document.getElementById('weekDropdown').classList.toggle('open');}

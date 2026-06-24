@@ -256,11 +256,11 @@ h1 span { color: #4ade80; }
 
 @media (max-width: 640px) {
   header, .tabs, .feed-header, .feed-grid, .data-header, .chart-wrap, .data-footer {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
   h1 { font-size: 22px; }
-  .chart-container { height: 400px; }
+  .chart-container { height: 480px; }
   .feed-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
 }
 </style>
@@ -388,7 +388,7 @@ const grid = document.getElementById('feed-grid');
 
   const followersEl = document.createElement('div');
   followersEl.className = 'card-followers';
-  followersEl.textContent = fmt(c.followers) + ' followers';
+  followersEl.textContent = 'IG+TT  ' + fmt(c.followers) + ' followers';
   a.appendChild(followersEl);
 
   const platformEl = document.createElement('div');
@@ -431,7 +431,8 @@ const enriched = pts.map(p => {
 });
 
 const maxF = Math.max(...pts.map(p=>p.x));
-function bR(f) { return Math.max(7, Math.sqrt(f/maxF)*36); }
+const isMobile = window.innerWidth < 640;
+function bR(f) { return Math.max(5, Math.sqrt(f/maxF)*(isMobile ? 22 : 36)); }
 
 const trendPts = [80000, 180000000].map(x=>({x, y: predictY(x)}));
 const tooltip = document.getElementById('tooltip');
@@ -469,7 +470,7 @@ function buildChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 24, right: 120, bottom: 8, left: 20 } },
+      layout: { padding: { top: 24, right: window.innerWidth < 640 ? 10 : 120, bottom: 8, left: window.innerWidth < 640 ? 4 : 20 } },
       animation: { duration: 600, easing: 'easeOutQuart' },
       scales: {
         x: {
@@ -535,14 +536,20 @@ function buildChart() {
       afterDatasetsDraw(chart) {
         const {ctx} = chart;
         const ds = chart.getDatasetMeta(1);
+        const mobile = window.innerWidth < 640;
         ctx.save();
         ds.data.forEach((el, i) => {
           const p = enriched[i];
           const {x, y} = el.getCenterPoint();
-          ctx.font = '500 11px -apple-system, BlinkMacSystemFont, Inter, sans-serif';
-          ctx.fillStyle = 'rgba(200,200,200,0.8)';
-          ctx.textAlign = 'left';
-          ctx.fillText(p.name, x + bR(p.x) + 5, y + 4);
+          ctx.font = mobile ? '500 9px -apple-system, sans-serif' : '500 11px -apple-system, BlinkMacSystemFont, Inter, sans-serif';
+          ctx.fillStyle = 'rgba(200,200,200,0.85)';
+          if (mobile) {
+            ctx.textAlign = 'center';
+            ctx.fillText(p.name, x, y - bR(p.x) - 3);
+          } else {
+            ctx.textAlign = 'left';
+            ctx.fillText(p.name, x + bR(p.x) + 5, y + 4);
+          }
         });
         ctx.restore();
       }

@@ -137,8 +137,8 @@ CARDS.forEach(function(c,cIdx){
   c.slides.forEach(function(s,i){
     var sl=document.createElement('div'); sl.className='slide'+(i===0?' on':'');
     var vd=document.createElement('video');
-    vd.src=s.f+'.mp4'; vd.poster=s.pj; vd.muted=true; vd.loop=true; vd.playsInline=true;
-    vd.setAttribute('preload','auto'); vd.setAttribute('webkit-playsinline','');
+    vd.__src=s.f+'.mp4'; vd.poster=s.pj; vd.muted=true; vd.loop=true; vd.playsInline=true;
+    vd.setAttribute('preload','none'); vd.setAttribute('webkit-playsinline','');
     vd.addEventListener('loadeddata',function(){ if(vd===active) ensureActivePlay(); });
     vd.addEventListener('canplay',function(){ if(vd===active) ensureActivePlay(); });
     sl.appendChild(vd); card.appendChild(sl);
@@ -185,7 +185,16 @@ CARDS.forEach(function(c,cIdx){
 });
 
 function recomputeVis(){ visIdx=[]; cards.forEach(function(c,i){ if(c.__c.week===currentWeek) visIdx.push(i); }); }
+function loadWeekVideos(week){
+  cards.forEach(function(c){
+    if(c.__c.week!==week) return;
+    c.__vids.forEach(function(vd){
+      if(!vd.src){ vd.src=vd.__src; vd.setAttribute('preload','auto'); }
+    });
+  });
+}
 recomputeVis();
+loadWeekVideos(currentWeek);
 
 // ---- week picker ----
 var weekDD=document.getElementById('weekDD');
@@ -200,7 +209,7 @@ function renderWeekDD(){
 function toggleWeekDD(){ if(weekDD.classList.contains('on')){weekDD.classList.remove('on');} else {renderWeekDD();weekDD.classList.add('on');} }
 function switchWeek(week){
   if(week===currentWeek){ weekDD.classList.remove('on'); return; }
-  currentWeek=week; recomputeVis(); ci=0;
+  currentWeek=week; recomputeVis(); loadWeekVideos(week); ci=0;
   if(visIdx.length){ cards[visIdx[0]].__si=0; show(); }
 }
 document.addEventListener('click',function(e){ if(!e.target.closest('#weekDD')&&!e.target.closest('.week')) weekDD.classList.remove('on'); });
@@ -242,7 +251,7 @@ function renderSearch(q){
     row.addEventListener('click',function(){
       var i=parseInt(row.getAttribute('data-i'),10);
       var wk=cards[i].__c.week;
-      if(wk!==currentWeek){ currentWeek=wk; recomputeVis(); }
+      if(wk!==currentWeek){ currentWeek=wk; recomputeVis(); loadWeekVideos(wk); }
       ci=visIdx.indexOf(i); if(ci<0) ci=0;
       cards[i].__si=0; show(); closeSearch();
     });

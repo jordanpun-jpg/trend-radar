@@ -20,11 +20,12 @@
   .ov::before{content:"";position:absolute;inset:0;
     background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,rgba(0,0,0,0) 20%,rgba(0,0,0,0) 55%,rgba(0,0,0,.68) 100%);}
   .ov>*{position:relative;}
-  .top{position:absolute;top:15px;left:14px;right:14px;display:flex;align-items:center;gap:12px;pointer-events:auto;}
-  .cat{font-size:12px;font-weight:700;color:#fff;padding:5px 12px;border-radius:20px;}
-  .week{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;
+  .top{position:absolute;top:15px;left:14px;right:14px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;pointer-events:auto;}
+  .cat{justify-self:center;font-size:12px;font-weight:700;color:#fff;padding:5px 12px;border-radius:20px;white-space:nowrap;}
+  .week{justify-self:start;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;
     background:rgba(0,0,0,.3);padding:6px 12px;border-radius:20px;}
   .week svg{width:9px;height:9px;}
+  .topicons{justify-self:end;display:flex;align-items:center;gap:12px;}
   .spk,.srch{width:21px;height:21px;opacity:.96;cursor:pointer;flex:0 0 auto;}
   .rail{position:absolute;right:11px;bottom:118px;display:flex;flex-direction:column;align-items:center;gap:19px;pointer-events:auto;}
   .rail .item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
@@ -37,8 +38,8 @@
   .bybubble{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:#fff;background:rgba(255,255,255,.17);padding:4px 11px;border-radius:20px;text-decoration:none;}
   .bybubble svg{width:11px;height:11px;opacity:.85;}
   .title{font-size:16px;line-height:1.34;text-shadow:0 1px 4px rgba(0,0,0,.55);}
-  .title .lead{color:rgba(255,255,255,.82);font-weight:500;}
-  .title .spec{font-weight:800;color:#fff;}
+  .title .lead{font-weight:800;color:#fff;}
+  .title .spec{color:rgba(255,255,255,.82);font-weight:500;}
   .dots{position:absolute;left:0;right:76px;bottom:22px;display:flex;justify-content:center;gap:6px;}
   .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.42);}
   .dots i.on{background:#fff;width:18px;border-radius:3px;}
@@ -137,7 +138,7 @@ CARDS.forEach(function(c,cIdx){
   c.slides.forEach(function(s,i){
     var sl=document.createElement('div'); sl.className='slide'+(i===0?' on':'');
     var vd=document.createElement('video');
-    vd.__src=s.f+'.mp4'; vd.poster=s.pj; vd.muted=true; vd.loop=true; vd.playsInline=true;
+    vd.__src=s.f+'.mp4'; vd.__poster=s.pj; vd.muted=true; vd.loop=true; vd.playsInline=true; vd.autoplay=true;
     vd.setAttribute('preload','none'); vd.setAttribute('webkit-playsinline','');
     vd.addEventListener('loadeddata',function(){ if(vd===active) ensureActivePlay(); });
     vd.addEventListener('canplay',function(){ if(vd===active) ensureActivePlay(); });
@@ -147,8 +148,9 @@ CARDS.forEach(function(c,cIdx){
   var dots=c.slides.map(function(_,i){return '<i class="'+(i===0?'on':'')+'"></i>';}).join('');
   var titleHTML='<span class="lead">'+c.title[0]+'</span>'+(c.title[1]?' <span class="spec">'+c.title[1]+'</span>':'');
   var ov=document.createElement('div'); ov.className='ov';
-  ov.innerHTML='<div class="top"><div class="cat" style="background:'+TYPE[c.type]+'">'+c.label+'</div>'
-    +'<div class="week">'+WEEKINFO[c.week].label+' '+IC.chev+'</div><div class="spk js-spk">'+IC.mute+'</div><div class="srch">'+IC.search+'</div></div>'
+  ov.innerHTML='<div class="top"><div class="week">'+WEEKINFO[c.week].label+' '+IC.chev+'</div>'
+    +'<div class="cat" style="background:'+TYPE[c.type]+'">'+c.label+'</div>'
+    +'<div class="topicons"><div class="spk js-spk">'+IC.mute+'</div><div class="srch">'+IC.search+'</div></div></div>'
     +'<div class="rail"><div class="item mult"><div class="big js-mult"></div><div class="sub">vs channel avg</div></div>'
     +'<div class="item"><div class="ic">'+IC.eye+'</div><div class="lab js-views"></div></div>'
     +'<div class="item js-src"><div class="ic">'+IC.link+'</div></div>'
@@ -189,7 +191,7 @@ function loadWeekVideos(week){
   cards.forEach(function(c){
     if(c.__c.week!==week) return;
     c.__vids.forEach(function(vd){
-      if(!vd.src){ vd.src=vd.__src; vd.setAttribute('preload','auto'); }
+      if(!vd.src){ vd.src=vd.__src; vd.poster=vd.__poster; vd.setAttribute('preload','auto'); }
     });
   });
 }

@@ -117,7 +117,7 @@ var IC={
 };
 var TYPE={trend:'#E24B4A',creators:'#C41D7F',format:'#BA7517'};
 var TIER={b1:'#378ADD',b2:'#1D9E75',b3:'#EF9F27',b4:'#E24B4A'};
-var WEEKORDER=['w8'];
+var WEEKORDER=['w8','w7','w6','w5','w4'];
 var WEEKINFO={
   w8:{label:'7/28 \u2013 8/3'},
   w7:{label:'7/21 \u2013 27'},
@@ -132,7 +132,7 @@ var cards=[], vids=[], soundOn=false, soundUnlocked=false, active=null;
 var ci=0;
 var currentWeek='w8', visIdx=[];
 
-var LIVE_CARDS=CARDS.filter(function(c){return c.week==='w8';});
+var LIVE_CARDS=CARDS;
 LIVE_CARDS.forEach(function(c,cIdx){
   var card=document.createElement('div'); card.className='card'+(cIdx===0?' on':'');
   card.__c=c; card.__si=0; card.__slides=[]; card.__vids=[]; card.__n=c.slides.length;

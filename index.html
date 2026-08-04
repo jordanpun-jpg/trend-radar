@@ -143,6 +143,7 @@ LIVE_CARDS.forEach(function(c,cIdx){
     vd.setAttribute('preload','none'); vd.setAttribute('webkit-playsinline','');
     vd.addEventListener('loadeddata',function(){ if(vd===active) ensureActivePlay(); });
     vd.addEventListener('canplay',function(){ if(vd===active) ensureActivePlay(); });
+    vd.addEventListener('loadedmetadata',function(){ applyFit(vd); });
     sl.appendChild(vd); card.appendChild(sl);
     card.__slides.push(sl); card.__vids.push(vd); vids.push(vd);
   });
@@ -273,6 +274,13 @@ function closeSearch(){
 searchInput.addEventListener('input',function(){renderSearch(this.value);});
 document.getElementById('searchCancel').addEventListener('click',closeSearch);
 
+function applyFit(vd){
+  if(!vd.videoWidth||!vd.videoHeight) return;
+  var va=vd.videoWidth/vd.videoHeight, ca=window.innerWidth/window.innerHeight;
+  var mismatch=va>ca ? va/ca : ca/va;
+  vd.style.objectFit = mismatch>1.6 ? 'contain' : 'cover';
+}
+window.addEventListener('resize',function(){ if(active) applyFit(active); });
 function syncSpk(){document.querySelectorAll('.js-spk').forEach(function(el){el.innerHTML=soundOn?IC.unmute:IC.mute;});}
 function toggleSound(){ soundOn=!soundOn; if(active) active.muted=!soundOn; syncSpk(); }
 function ensureActivePlay(){ if(!active)return; active.muted=!soundOn; var p=active.play(); if(p&&p.catch)p.catch(function(){}); }

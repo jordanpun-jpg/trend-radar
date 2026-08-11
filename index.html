@@ -309,9 +309,14 @@ function playActive(){ centerBtn.classList.remove('show'); ensureActivePlay(); }
 function pauseActive(){ if(!active)return; active.pause(); centerBtn.classList.add('show'); }
 function togglePlay(){ if(!active)return; if(active.paused) playActive(); else pauseActive(); }
 
-function show(){
+var CARD_ANIM_MS=340, cardAnimating=false;
+function show(dir,prevRealIdx){
   var realIdx=visIdx[ci]; var card=cards[realIdx];
-  cards.forEach(function(c,i){ c.classList.toggle('on', i===realIdx); if(i!==realIdx) c.classList.remove('sheetopen'); });
+  if(dir && prevRealIdx!==undefined && prevRealIdx!==realIdx){
+    animateCardSwap(cards[prevRealIdx], card, dir);
+  } else {
+    cards.forEach(function(c,i){ c.classList.toggle('on', i===realIdx); if(i!==realIdx) c.classList.remove('sheetopen'); });
+  }
   card.__slides.forEach(function(sl,i){ sl.classList.toggle('on', i===card.__si); });
   card.__update(card.__si);
   centerBtn.classList.remove('show');
@@ -320,7 +325,28 @@ function show(){
   vid.autoplay=true; vid.setAttribute('preload','auto');
   active=vid; ensureActivePlay();
 }
-function goCard(d){ var n=Math.max(0,Math.min(visIdx.length-1,ci+d)); if(n!==ci){ ci=n; cards[visIdx[ci]].__si=0; show(); } }
+function animateCardSwap(oldCard,newCard,dir){
+  cardAnimating=true;
+  var outY=dir>0?'-100%':'100%', inY=dir>0?'100%':'-100%';
+  newCard.style.transition='none';
+  newCard.style.transform='translateY('+inY+')';
+  newCard.classList.add('on');
+  newCard.getBoundingClientRect();
+  var ease='transform '+CARD_ANIM_MS+'ms cubic-bezier(.22,.61,.36,1)';
+  oldCard.style.transition=ease;
+  newCard.style.transition=ease;
+  requestAnimationFrame(function(){
+    oldCard.style.transform='translateY('+outY+')';
+    newCard.style.transform='translateY(0)';
+  });
+  setTimeout(function(){
+    oldCard.classList.remove('on'); oldCard.classList.remove('sheetopen');
+    oldCard.style.transition=''; oldCard.style.transform='';
+    newCard.style.transition=''; newCard.style.transform='';
+    cardAnimating=false;
+  }, CARD_ANIM_MS+30);
+}
+function goCard(d){ if(cardAnimating) return; var n=Math.max(0,Math.min(visIdx.length-1,ci+d)); if(n!==ci){ var prevRealIdx=visIdx[ci]; ci=n; cards[visIdx[ci]].__si=0; show(d,prevRealIdx); } }
 function goSlide(d){ var card=cards[visIdx[ci]]; var n=Math.max(0,Math.min(card.__n-1,card.__si+d)); if(n!==card.__si){ card.__si=n; show(); } }
 
 function unlockSound(){ if(!soundUnlocked){ soundUnlocked=true; soundOn=true; if(active) active.muted=false; syncSpk(); } }

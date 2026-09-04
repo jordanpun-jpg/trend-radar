@@ -50,6 +50,8 @@
     background:rgba(0,0,0,.42);color:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:none;opacity:0;transition:opacity .2s;}
   .center-btn.show{opacity:1;pointer-events:auto;}
   .center-btn svg{width:35px;height:35px;margin-left:3px;}
+  .toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9;background:rgba(20,20,24,.9);color:#fff;font-size:13.5px;font-weight:600;padding:10px 18px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .25s;white-space:nowrap;}
+  .toast.show{opacity:1;}
   .scrim{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .28s;z-index:5;}
   .sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;background:#fff;color:#17171a;border-radius:20px 20px 0 0;height:70%;
     transform:translateY(101%);transition:transform .34s cubic-bezier(.32,.72,.24,1);display:flex;flex-direction:column;padding:10px 22px 30px;overflow-y:auto;}
@@ -118,7 +120,8 @@ var IC={
   chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
   mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>',
   unmute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
-  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'
+  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'
 };
 var TYPE={trend:'#E24B4A',creators:'#C41D7F',format:'#BA7517'};
 var TIER={b1:'#EF4444',b2:'#F59E0B',b3:'#84CC16',b4:'#22C55E'};
@@ -181,7 +184,8 @@ LIVE_CARDS.forEach(function(c,cIdx){
     +'<div class="rail"><div class="item mult"><div class="big js-views-big"></div><div class="sub">views</div></div>'
     +'<div class="item"><div class="ic ic-mult js-mult-circle"></div><div class="lab">vs channel<br>avg</div></div>'
     +'<div class="item js-src"><div class="ic js-platform-ic">'+IC.link+'</div></div>'
-    +'<div class="item js-info"><div class="ic">'+IC.info+'</div></div></div>'
+    +'<div class="item js-info"><div class="ic">'+IC.info+'</div></div>'
+    +'<div class="item js-share"><div class="ic">'+IC.share+'</div></div></div>'
     +'<div class="cap"><a class="bybubble js-by" target="_blank" rel="noopener" style="display:none">'+IC.link+'<span class="js-byn"></span></a>'
     +'<div class="title">'+titleHTML+'</div></div><div class="dots js-dots">'+dots+'</div>';
   card.appendChild(ov);
@@ -197,6 +201,7 @@ LIVE_CARDS.forEach(function(c,cIdx){
   sheet.querySelector('.closex').addEventListener('click',function(){card.classList.remove('sheetopen'); if(active&&active.paused) centerBtn.classList.add('show');});
   ov.querySelector('.js-spk').addEventListener('click',function(e){e.stopPropagation();toggleSound();});
   ov.querySelector('.js-src').addEventListener('click',function(e){e.stopPropagation();var s=c.slides[card.__si];if(s.vu)window.open(s.vu,'_blank');});
+  ov.querySelector('.js-share').addEventListener('click',function(e){e.stopPropagation();shareLink();});
   ov.querySelector('.srch').addEventListener('click',function(e){e.stopPropagation();openSearch();});
   ov.querySelector('.week').addEventListener('click',function(e){e.stopPropagation();toggleWeekDD();});
 
@@ -250,6 +255,30 @@ document.addEventListener('click',function(e){ if(!e.target.closest('#weekDD')&&
 
 var centerBtn=document.createElement('div'); centerBtn.className='center-btn'; centerBtn.innerHTML=IC.play;
 document.querySelector('.phone').appendChild(centerBtn);
+
+// ---- share ----
+var toastEl=document.createElement('div'); toastEl.className='toast';
+document.querySelector('.phone').appendChild(toastEl);
+var toastTimer=null;
+function showToast(msg){
+  toastEl.textContent=msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){toastEl.classList.remove('show');},1600);
+}
+function fallbackCopy(text){
+  var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+}
+function shareLink(){
+  var url=window.location.href;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){showToast('Copied to clipboard');}).catch(function(){fallbackCopy(url);showToast('Copied to clipboard');});
+  } else {
+    fallbackCopy(url); showToast('Copied to clipboard');
+  }
+}
 
 // ---- search ----
 var searchOv=document.getElementById('searchOv'), searchInput=document.getElementById('searchInput'), searchRes=document.getElementById('searchRes');
